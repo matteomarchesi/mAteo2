@@ -1,3 +1,68 @@
+/*
+ * #mAteo2
+ * weather station with ESP-01
+ *
+ * GPIO0/2 used as SCA/SCL for BMP180
+ * GPIO3 (RX) used as data pin of DHT22
+ *
+ * ****WARNING*****
+ * TO FLASH NEW CODE
+ * 1- Disconnect GPIO3 from DHT22 data pin
+ * 2- ground GPIO0 (no need to disconnect from BMP180)
+ *
+ * BOM:
+ * - ESP-01
+ * - DHT22
+ * - BMP180
+ * - 330R resistor (1x)
+ * - 3K3 resistors (4x)
+ * - USB programmer interface (for programming/debugging only)
+ * to be added:
+ * - power supply
+ *   . 9V battery (check to be evaluated)
+ *   . LM1117-3.3 voltage regulator
+ *   . 10uF tantalum cap for voltage regulator
+ * - programming switcher
+ *   . slide switch for easy flashing
+ *   OR
+ *   . test pins (2x 3pin strips) + 2x jumpers
+ * - test pins for USB programmer (1x 6 pin strip)
+ * to be evalueted:
+ * - usage of lipo battery and charger
+ * 
+ *  ESP-01 pinout
+ *
+ *     A    RX     o o  Vcc
+ *     N    GPIO0  o o  RST
+ *     T    GPIO2  o o  CH_PD
+ *          GND    o o  TX
+ *
+ * ESP-01 connections
+ *     programmer TX 	330R  (a) 	o o  		Vcc
+ *     Vcc     			3K3   (b)	o o  3K3	Vcc
+ *     Vcc     			3K3   (c) 	o o  3K3	Vcc
+ *     Gnd     						o o  		programmer TR
+ *
+ *	Programmer
+ *	TX to ESP-01 RX
+ *  RX to 330R to ESP-01 TX
+ *  Vcc to Vcc
+ *  Gnd to GND
+ *
+ *	DHT22
+ *  Sig to (a) ESP-01
+ *  Vcc to Vcc
+ *  Gnd to GND
+ *
+ *	BMP180
+ *	SDA to (b) ESP-01
+ *  SCL to (c) ESP-01
+ *  Vcc to Vcc
+ *  Gnd to GND
+ *
+ */
+
+
 // wifi connection
 
 #include <ESP8266WiFi.h>
@@ -26,6 +91,7 @@ SFE_BMP180 pressure;
  
 void setup() {
 
+  // start Serial as TX only (GPIO1) to use the RX pin (GPIO3)
   Serial.begin(115200,SERIAL_8N1,SERIAL_TX_ONLY);
   pinMode(3,INPUT_PULLUP);
   delay(10);
@@ -56,13 +122,11 @@ void setup() {
   Serial.print(WiFi.localIP());
   Serial.println("/");
 
-// per DHT
-//  pinMode(2,INPUT);
-
 // sda/scl to 0/2
   Wire.begin(0,2);
   delay(500);
-// BPM setup
+
+  // BPM setup
   pressure.begin();
   
 }
