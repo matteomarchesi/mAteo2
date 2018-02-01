@@ -1,0 +1,36 @@
+
+A
+502.145.60	100x58x236		PAX struttura per guardaroba			bianco
+301.839.89															rovere
+
+B
+303.469.34	 53x58x236		PAX elemento angolare supplem/4 ripiani	bianco
+803.469.60															rovere
+
+C
+802.145.68	 50x58x236 	bianco
+901.839.91				rovere
+
+202.145.71	 75x58x236 	bianco
+501.839.93				rovere
+			 
+502.145.60	100x58x236		PAX struttura per guardaroba			bianco
+301.839.89															rovere
+			
+			
++------110.5----
+|+====a====+
+1|    A    b
+1+=========+
+0+=b=+
+.| B c
+5+===+
+|+=b=+
+|| C d
+|+===+
+|
+|
+
+a = 100
+b = 58
+c = 53
