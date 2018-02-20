@@ -62,16 +62,36 @@
  *
  */
 
+unsigned long previousMillis = 0;        
+const long interval = 15 * 60 * 1000;
 
 // wifi connection
 
 #include <ESP8266WiFi.h>
- 
-const char* ssid     = "Linkem2.4GHz_9080AD";
-const char* password = "nostrarete!";
+#include <ESP8266WiFiMulti.h>
+#include <ESP8266mDNS.h> 
+#include <ESP8266WebServer.h>
 
-// wifi server
-WiFiServer server(80);
+ESP8266WiFiMulti wifiMulti;  
+
+ESP8266WebServer serverint(80);    
+
+void handleRoot();              
+void handleNotFound();
+
+const char* ssid      = "Linkem2.4GHz_9080AD";
+const char* password  = "nostrarete!";
+const char* ssid2     = "linkem2.4GHz_9080AD-ext";
+const char* password2 = "nostrarete!";
+
+
+// Replace with your unique Thing Speak WRITE API KEY
+const char* apiKey    = "A1QSQK269EGGKM8D";
+const char* resource  = "/update?api_key=";
+
+// Thing Speak API server 
+const char* server    = "api.thingspeak.com";
+
 
 // DHT
 #include <DHT.h>
@@ -88,14 +108,67 @@ char status;
 double P, T, h, t;
 
 SFE_BMP180 pressure;
- 
-void setup() {
 
+
+void setup() {
+  delay(5000);
   // start Serial as TX only (GPIO1) to use the RX pin (GPIO3)
   Serial.begin(115200,SERIAL_8N1,SERIAL_TX_ONLY);
   pinMode(3,INPUT_PULLUP);
   delay(10);
+
+  connect2wifimulti();
+  
+// sda/scl to 0/2
+  Wire.begin(0,2);
+  delay(500);
+
+  // BPM setup
+  pressure.begin();
+  
+}
  
+void loop() {
+   unsigned long currentMillis = millis();
+   if (currentMillis - previousMillis >= interval) {
+    previousMillis = currentMillis;
+    readSensors();
+    send2server();
+   }
+   serverint.handleClient(); 
+}
+
+void connect2wifimulti(){
+  
+  wifiMulti.addAP(ssid, password);   
+  wifiMulti.addAP(ssid2, password2);
+
+  Serial.println("Connecting ...");
+  int i = 0;
+  while (wifiMulti.run() != WL_CONNECTED) { // Wait for the Wi-Fi to connect: scan for Wi-Fi networks, and connect to the strongest of the networks above
+    delay(1000);
+    Serial.print('.');
+  }
+  Serial.println('\n');
+  Serial.print("Connected to ");
+  Serial.println(WiFi.SSID());              // Tell us what network we're connected to
+  Serial.print("IP address:\t");
+  Serial.println(WiFi.localIP()); 
+  Serial.println('\n');
+
+  if (!MDNS.begin("esp8266")) { 
+    Serial.println("Error setting up MDNS responder!");
+  }
+  Serial.println("mDNS responder started");
+  
+  serverint.on("/", handleRoot);               // Call the 'handleRoot' function when a client requests URI "/"
+  serverint.onNotFound(handleNotFound);        // When a client requests an unknown URI (i.e. something other than "/"), call function "handleNotFound"
+
+  serverint.begin();                           // Actually start the server
+  Serial.println("HTTP server started");
+}
+
+void connect2wifi(){
   // Connect to WiFi network
   Serial.println();
   Serial.println();
@@ -112,133 +185,83 @@ void setup() {
   Serial.println("");
   Serial.println("WiFi connected");
    
-  // Start the server
-  server.begin();
-  Serial.println("Server started");
- 
-  // Print the IP address
-  Serial.print("Use this URL to connect: ");
-  Serial.print("http://");
-  Serial.print(WiFi.localIP());
-  Serial.println("/");
-
-// sda/scl to 0/2
-  Wire.begin(0,2);
-  delay(500);
-
-  // BPM setup
-  pressure.begin();
-  
-}
- 
-void loop() {
-  // Check if a client has connected
-  WiFiClient client = server.available();
-  if (!client) {
-    return;
-  }
-   
-  // Wait until the client sends some data
-  Serial.println("new client");
-  while(!client.available()){
-    delay(1);
-  }
-
-  delay(2000);
-  h = dht.readHumidity();
-  t = dht.readTemperature();
-  
-  status = pressure.startTemperature();
-  if (status != 0)
-  {
-    // Wait for the measurement to complete:
-    delay(status);
-    status = pressure.getTemperature(T);
-  }
-
-  status = pressure.startPressure(3);
-  if (status != 0)
-  {
-    // Wait for the measurement to complete:
-    delay(status);
-    status = pressure.getPressure(P,T);
-  }
-   
- 
-  // Return the response
-  client.println("HTTP/1.1 200 OK");
-  client.println("Content-Type: text/html");
-  client.println(""); //  do not forget this one
-  client.println("<!DOCTYPE HTML>");
-  client.println("<html>");
-  client.println("<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">");
-  client.println("<head>");
-  client.println("<style>");
-  client.println("html{box-sizing:border-box}*,*:before,*:after{box-sizing:inherit}");
-  client.println("html,body{font-family:Verdana,sans-serif;font-size:15px;line-height:1.5}html{overflow-x:hidden}");
-  client.println("h1{font-size:36px}.w3-serif{font-family:serif}");
-  client.println("h1{font-family:\"Segoe UI\",Arial,sans-serif;font-weight:400;margin:10px 0;text-align: center;}.w3-wide{letter-spacing:4px}");
-  client.println(".w3-table{border-collapse:collapse;border-spacing:0;width:100%;display:table}");
-  client.println(".w3-striped tbody tr:nth-child(even){background-color:#f1f1f1}");
-  client.println(".w3-table td,.w3-table th{padding:8px 8px;display:table-cell;text-align:left;vertical-align:top}");
-  client.println(".w3-table th:first-child,.w3-table td:first-child{padding-left:16px}");
-  client.println(".w3-teal{color:#fff!important;background-color:#009688!important}");
-  client.println("</style>");
-  client.println("</head>");
-  
-  client.println("<body>");
-  client.println("<div class=\"w3-container w3-teal\">");
-  client.println("<h1>mAteo 2.0</h1>");
-  client.println("</div>");
-  client.println("<div class=\"w3-row-padding\">");
-  client.println("  <table class=\"w3-table w3-striped\">");
-  client.println("  <tr>");
-  client.println("    <th>Dato</th>");
-  client.println("    <th>Valore</th>");
-//  client.println("    <th>Aggiornamento</th>");
-  client.println("  </tr>");
-  client.println("  <tr>");
-  client.println("    <td>Temperatura (DHT)</td>");
-  client.println("    <td>");
-  client.println(t);
-  client.println("  &#8451;</td>");
-//  client.println("    <td></td>");
-  client.println("  </tr>");
-  
-  client.println("  <tr>");
-  client.println("    <td>Umidita`</td>");
-  client.println("    <td>");
-  client.println(h);
-  client.println("  %RH</td>");
-//  client.println("    <td></td>");
-  client.println("  </tr>");
-
-  client.println("  <tr>");
-  client.println("    <td>Pressione</td>");
-  client.println("    <td>");
-  client.println(P);
-  client.println("  mb</td>");
- // client.println("    <td></td>");
-  client.println("  </tr>");
-
-  client.println("  <tr>");
-  client.println("    <td>Temperatura (BMP)</td>");
-  client.println("    <td>");
-  client.println(T);
-  client.println("  &#8451;</td>");
-//  client.println("    <td></td>");
-  client.println("  </tr>");
-  
-  client.println("    </table>");
-  client.println("</div>");
-  client.println("</body>");
-
-
-  client.println("</html>");
- 
-  delay(1);
-  Serial.println("Client disonnected");
-  Serial.println("");
- 
 }
 
+
+void readSensors(){
+    h = dht.readHumidity();
+    t = dht.readTemperature();
+    
+    status = pressure.startTemperature();
+    if (status != 0)
+    {
+      // Wait for the measurement to complete:
+      delay(status);
+      status = pressure.getTemperature(T);
+    }
+  
+    status = pressure.startPressure(3);
+    if (status != 0)
+    {
+      // Wait for the measurement to complete:
+      delay(status);
+      status = pressure.getPressure(P,T);
+    }
+    Serial.print("temp \t");
+    Serial.println(t);
+    Serial.print("humi \t");
+    Serial.println(h);
+    Serial.print("Temp \t");
+    Serial.println(T);
+    Serial.print("Pres \t");
+    Serial.println(P);
+    Serial.println();
+    
+}
+
+
+void send2server(){
+  WiFiClient client;
+  
+  int retries = 25;
+  
+  while(!!!client.connect(server, 80) && (retries-- > 0)) {
+    Serial.print(".");
+  }
+  Serial.println();
+  if(!!!client.connected()) {
+     Serial.println("Failed to connect, going back to sleep");
+  }
+  
+  Serial.print("Request resource: "); 
+  Serial.println(resource);
+  client.print(String("GET ") + resource + apiKey + "&field1=" + t + "&field2=" + h + "&field3=" + T + "&field4=" + P +
+                  " HTTP/1.1\r\n" +
+                  "Host: " + server + "\r\n" + 
+                  "Connection: close\r\n\r\n");
+
+                  
+  int timeout = 5 * 10; // 5 seconds             
+  while(!!!client.available() && (timeout-- > 0)){
+    delay(100);
+  }
+  if(!!!client.available()) {
+     Serial.println("No response, going back to sleep");
+  }
+  while(client.available()){
+    Serial.write(client.read());
+  }
+  
+  Serial.println("\nclosing connection");
+  client.stop();
+
+}
+
+void handleRoot() {
+                         
+  serverint.send(200, "text/html", "<p>" + WiFi.SSID() + "</p><p>" + String(WiFi.localIP()) +  "<p>temp: " + String(t) + "</p><p>humi:" + String(h) + "</p><p>Temp: " + String(T) + "</p><p>Pres: " + String(P) + "</p>");
+}
+
+void handleNotFound(){
+  serverint.send(404, "text/plain", "404: Not found"); // Send HTTP status 404 (Not Found) when there's no handler for the URI in the request
+}

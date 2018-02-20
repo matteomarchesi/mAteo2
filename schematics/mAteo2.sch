@@ -1,0 +1,287 @@
+EESchema Schematic File Version 2
+LIBS:power
+LIBS:device
+LIBS:switches
+LIBS:relays
+LIBS:motors
+LIBS:transistors
+LIBS:conn
+LIBS:linear
+LIBS:regul
+LIBS:74xx
+LIBS:cmos4000
+LIBS:adc-dac
+LIBS:memory
+LIBS:xilinx
+LIBS:microcontrollers
+LIBS:dsp
+LIBS:microchip
+LIBS:analog_switches
+LIBS:motorola
+LIBS:texas
+LIBS:intel
+LIBS:audio
+LIBS:interface
+LIBS:digital-audio
+LIBS:philips
+LIBS:display
+LIBS:cypress
+LIBS:siliconi
+LIBS:opto
+LIBS:atmel
+LIBS:contrib
+LIBS:valves
+LIBS:ESP8266
+LIBS:BMP180
+LIBS:DHT11_22
+LIBS:Programmer
+LIBS:mAteo2-cache
+EELAYER 25 0
+EELAYER END
+$Descr A4 11693 8268
+encoding utf-8
+Sheet 1 1
+Title ""
+Date ""
+Rev ""
+Comp ""
+Comment1 ""
+Comment2 ""
+Comment3 ""
+Comment4 ""
+$EndDescr
+$Comp
+L ESP-01v090 U1
+U 1 1 5A6DE0AF
+P 4000 2350
+F 0 "U1" H 4000 2250 50  0000 C CNN
+F 1 "ESP-01v090" H 4000 2450 50  0000 C CNN
+F 2 "" H 4000 2350 50  0001 C CNN
+F 3 "" H 4000 2350 50  0001 C CNN
+	1    4000 2350
+	1    0    0    -1  
+$EndComp
+$Comp
+L R R3
+U 1 1 5A6DE14E
+P 5900 2300
+F 0 "R3" V 5980 2300 50  0000 C CNN
+F 1 "3K3" V 5900 2300 50  0000 C CNN
+F 2 "" V 5830 2300 50  0001 C CNN
+F 3 "" H 5900 2300 50  0001 C CNN
+	1    5900 2300
+	0    1    1    0   
+$EndComp
+$Comp
+L R R4
+U 1 1 5A6DE21C
+P 5900 2400
+F 0 "R4" V 5980 2400 50  0000 C CNN
+F 1 "3k3" V 5900 2400 50  0000 C CNN
+F 2 "" V 5830 2400 50  0001 C CNN
+F 3 "" H 5900 2400 50  0001 C CNN
+	1    5900 2400
+	0    1    1    0   
+$EndComp
+$Comp
+L R R5
+U 1 1 5A6DE2A9
+P 5900 2500
+F 0 "R5" V 5980 2500 50  0000 C CNN
+F 1 "330R" V 5900 2500 50  0000 C CNN
+F 2 "" V 5830 2500 50  0001 C CNN
+F 3 "" H 5900 2500 50  0001 C CNN
+	1    5900 2500
+	0    1    1    0   
+$EndComp
+$Comp
+L R R2
+U 1 1 5A6DE308
+P 2500 2400
+F 0 "R2" V 2580 2400 50  0000 C CNN
+F 1 "3K3" V 2500 2400 50  0000 C CNN
+F 2 "" V 2430 2400 50  0001 C CNN
+F 3 "" H 2500 2400 50  0001 C CNN
+	1    2500 2400
+	0    1    1    0   
+$EndComp
+$Comp
+L R R1
+U 1 1 5A6DE5A1
+P 2500 2300
+F 0 "R1" V 2580 2300 50  0000 C CNN
+F 1 "3K3" V 2500 2300 50  0000 C CNN
+F 2 "" V 2430 2300 50  0001 C CNN
+F 3 "" H 2500 2300 50  0001 C CNN
+	1    2500 2300
+	0    1    1    0   
+$EndComp
+Wire Wire Line
+	2250 1050 2250 3200
+Wire Wire Line
+	2250 2400 2350 2400
+Wire Wire Line
+	2350 2300 2250 2300
+Connection ~ 2250 2300
+Wire Wire Line
+	2650 2400 3050 2400
+Wire Wire Line
+	2650 2300 3050 2300
+Wire Wire Line
+	2250 2500 3050 2500
+Connection ~ 2250 2400
+$Comp
+L GND #PWR01
+U 1 1 5A6DE893
+P 2250 4000
+F 0 "#PWR01" H 2250 3750 50  0001 C CNN
+F 1 "GND" H 2250 3850 50  0000 C CNN
+F 2 "" H 2250 4000 50  0001 C CNN
+F 3 "" H 2250 4000 50  0001 C CNN
+	1    2250 4000
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	2150 3400 6800 3400
+Wire Wire Line
+	5050 2000 5050 3400
+Wire Wire Line
+	5050 2200 4950 2200
+Wire Wire Line
+	4950 2300 5750 2300
+Wire Wire Line
+	4950 2400 5750 2400
+Wire Wire Line
+	4950 2500 5750 2500
+Wire Wire Line
+	6150 2400 6050 2400
+Wire Wire Line
+	6150 1800 6150 2400
+Wire Wire Line
+	6150 1800 2250 1800
+Connection ~ 2250 1800
+Wire Wire Line
+	6050 2300 6150 2300
+Connection ~ 6150 2300
+Wire Wire Line
+	6250 2500 6250 1700
+Wire Wire Line
+	6250 1700 2900 1700
+Wire Wire Line
+	2900 1700 2900 1250
+$Comp
+L BMP180 U2
+U 1 1 5A6F5D17
+P 7550 3450
+F 0 "U2" H 7550 3350 50  0000 C CNN
+F 1 "BMP180" H 7550 3550 50  0000 C CNN
+F 2 "MODULE" H 7550 3450 50  0001 C CNN
+F 3 "DOCUMENTATION" H 7550 3450 50  0001 C CNN
+	1    7550 3450
+	1    0    0    -1  
+$EndComp
+$Comp
+L DHT11_22 U3
+U 1 1 5A6F5EBE
+P 7550 4300
+F 0 "U3" H 7550 4200 50  0000 C CNN
+F 1 "DHT11_22" H 7550 4400 50  0000 C CNN
+F 2 "MODULE" H 7550 4300 50  0001 C CNN
+F 3 "DOCUMENTATION" H 7550 4300 50  0001 C CNN
+	1    7550 4300
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	4450 3400 4450 4400
+Connection ~ 4450 3400
+Wire Wire Line
+	4650 4200 6800 4200
+Wire Wire Line
+	4650 3200 4650 4200
+Wire Wire Line
+	2250 3200 4650 3200
+Connection ~ 2250 2500
+Wire Wire Line
+	6800 3300 4650 3300
+Connection ~ 4650 3300
+$Comp
+L SW_DIP_x01 SW1
+U 1 1 5A6F6337
+P 5350 2000
+F 0 "SW1" H 5350 2150 50  0000 C CNN
+F 1 "SW_DIP_x01" H 5350 1850 50  0000 C CNN
+F 2 "" H 5350 2000 50  0001 C CNN
+F 3 "" H 5350 2000 50  0001 C CNN
+	1    5350 2000
+	1    0    0    -1  
+$EndComp
+$Comp
+L SW_DIP_x01 SW2
+U 1 1 5A6F63A6
+P 6100 3100
+F 0 "SW2" H 6100 3250 50  0000 C CNN
+F 1 "SW_DIP_x01" H 6100 2950 50  0000 C CNN
+F 2 "" H 6100 3100 50  0001 C CNN
+F 3 "" H 6100 3100 50  0001 C CNN
+	1    6100 3100
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	5650 2000 5650 2400
+Connection ~ 5650 2400
+Connection ~ 5050 2200
+Connection ~ 5650 2500
+Wire Wire Line
+	4450 4400 6800 4400
+Wire Wire Line
+	5800 3100 5650 3100
+Wire Wire Line
+	5650 3100 5650 2500
+Wire Wire Line
+	6800 4300 6450 4300
+Wire Wire Line
+	6450 4300 6450 3100
+Wire Wire Line
+	6450 3100 6400 3100
+Connection ~ 5050 3400
+Wire Wire Line
+	6800 3500 5500 3500
+Wire Wire Line
+	5500 3500 5500 2300
+Connection ~ 5500 2300
+Wire Wire Line
+	6800 3600 5400 3600
+Wire Wire Line
+	5400 3600 5400 2400
+Connection ~ 5400 2400
+Wire Wire Line
+	6250 2500 6050 2500
+Wire Wire Line
+	2700 2200 3050 2200
+Wire Wire Line
+	2700 1150 2700 2200
+Wire Wire Line
+	2250 3400 2250 4000
+$Comp
+L Programmer U4
+U 1 1 5A6F8943
+P 4200 1100
+F 0 "U4" H 4200 1000 50  0000 C CNN
+F 1 "Programmer" H 4200 1200 50  0000 C CNN
+F 2 "MODULE" H 4200 1100 50  0001 C CNN
+F 3 "DOCUMENTATION" H 4200 1100 50  0001 C CNN
+	1    4200 1100
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	2900 1250 3450 1250
+Wire Wire Line
+	3450 1150 2700 1150
+Wire Wire Line
+	3450 1050 2250 1050
+Wire Wire Line
+	3450 850  2150 850 
+Wire Wire Line
+	2150 850  2150 3400
+Connection ~ 2250 3400
+$EndSCHEMATC
