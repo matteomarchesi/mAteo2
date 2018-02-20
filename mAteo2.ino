@@ -74,7 +74,7 @@ const long interval = 15 * 60 * 1000;
 
 ESP8266WiFiMulti wifiMulti;  
 
-ESP8266WebServer serverint(80);    
+ESP8266WebServer serverino(80);    
 
 void handleRoot();              
 void handleNotFound();
@@ -135,7 +135,7 @@ void loop() {
     readSensors();
     send2server();
    }
-   serverint.handleClient(); 
+   serverino.handleClient(); 
 }
 
 void connect2wifimulti(){
@@ -156,15 +156,15 @@ void connect2wifimulti(){
   Serial.println(WiFi.localIP()); 
   Serial.println('\n');
 
-  if (!MDNS.begin("esp8266")) { 
+  if (!MDNS.begin("mAteo2.01")) { 
     Serial.println("Error setting up MDNS responder!");
   }
   Serial.println("mDNS responder started");
   
-  serverint.on("/", handleRoot);               // Call the 'handleRoot' function when a client requests URI "/"
-  serverint.onNotFound(handleNotFound);        // When a client requests an unknown URI (i.e. something other than "/"), call function "handleNotFound"
+  serverino.on("/", handleRoot);               // Call the 'handleRoot' function when a client requests URI "/"
+  serverino.onNotFound(handleNotFound);        // When a client requests an unknown URI (i.e. something other than "/"), call function "handleNotFound"
 
-  serverint.begin();                           // Actually start the server
+  serverino.begin();                           // Actually start the server
   Serial.println("HTTP server started");
 }
 
@@ -259,9 +259,9 @@ void send2server(){
 
 void handleRoot() {
                          
-  serverint.send(200, "text/html", "<p>" + WiFi.SSID() + "</p><p>" + String(WiFi.localIP()) +  "<p>temp: " + String(t) + "</p><p>humi:" + String(h) + "</p><p>Temp: " + String(T) + "</p><p>Pres: " + String(P) + "</p>");
+  serverino.send(200, "text/html", "<p>" + WiFi.SSID() + "</p><p>" + WiFi.localIP() +  "<p>temp: " + String(t) + "</p><p>humi:" + String(h) + "</p><p>Temp: " + String(T) + "</p><p>Pres: " + String(P) + "</p>");
 }
 
 void handleNotFound(){
-  serverint.send(404, "text/plain", "404: Not found"); // Send HTTP status 404 (Not Found) when there's no handler for the URI in the request
+  serverino.send(404, "text/plain", "404: Not found"); // Send HTTP status 404 (Not Found) when there's no handler for the URI in the request
 }
