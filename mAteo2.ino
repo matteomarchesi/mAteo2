@@ -156,7 +156,7 @@ void connect2wifimulti(){
   Serial.println(WiFi.localIP()); 
   Serial.println('\n');
 
-  if (!MDNS.begin("mAteo2.01")) { 
+  if (!MDNS.begin("mAteo2")) { 
     Serial.println("Error setting up MDNS responder!");
   }
   Serial.println("mDNS responder started");
