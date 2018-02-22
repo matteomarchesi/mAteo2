@@ -109,6 +109,12 @@ double P, T, h, t;
 
 SFE_BMP180 pressure;
 
+// power supply measure for battery monitoring
+
+ADC_MODE(ADC_VCC);
+
+float voltage=0.00f;
+
 
 void setup() {
   delay(5000);
@@ -207,6 +213,10 @@ void readSensors(){
       delay(status);
       status = pressure.getPressure(P,T);
     }
+	
+	voltage = ESP.getVcc();
+	
+	
     Serial.print("temp \t");
     Serial.println(t);
     Serial.print("humi \t");
@@ -214,7 +224,10 @@ void readSensors(){
     Serial.print("Temp \t");
     Serial.println(T);
     Serial.print("Pres \t");
-    Serial.println(P);
+    Serial.print(P);
+    Serial.print("Volt \t");
+    Serial.println(voltage/1024.00f);
+	
     Serial.println();
     
 }
@@ -235,7 +248,7 @@ void send2server(){
   
   Serial.print("Request resource: "); 
   Serial.println(resource);
-  client.print(String("GET ") + resource + apiKey + "&field1=" + t + "&field2=" + h + "&field3=" + T + "&field4=" + P +
+  client.print(String("GET ") + resource + apiKey + "&field1=" + t + "&field2=" + h + "&field3=" + T + "&field4=" + P + "&field4=" + voltage/1024.00f
                   " HTTP/1.1\r\n" +
                   "Host: " + server + "\r\n" + 
                   "Connection: close\r\n\r\n");
@@ -258,8 +271,7 @@ void send2server(){
 }
 
 void handleRoot() {
-                         
-  serverino.send(200, "text/html", "<p>" + WiFi.SSID() + "</p><p>" + WiFi.localIP() +  "<p>temp: " + String(t) + "</p><p>humi:" + String(h) + "</p><p>Temp: " + String(T) + "</p><p>Pres: " + String(P) + "</p>");
+  serverino.send(200, "text/html", "<p>" + WiFi.SSID() + "</p><p>" + String(WiFi.localIP()) +  "<p>temp: " + String(t) + "</p><p>humi:" + String(h) + "</p><p>Temp: " + String(T) + "</p><p>Pres: " + String(P) + "</p><p>Volt: " + String(voltage/1024) + "</p>");
 }
 
 void handleNotFound(){
