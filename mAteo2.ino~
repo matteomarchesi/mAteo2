@@ -309,7 +309,7 @@ void send2server(){
   
   Serial.print("Request resource: "); 
   Serial.println(resource);
-  client.print(String("GET ") + resource + apiKey + "&field1=" + t + "&field2=" + h + "&field3=" + T + "&field4=" + P + "&field5=" + voltage +
+  client.print(String("GET ") + resource + apiKey + "&field1=" + t + "&field2=" + h + "&field3=" + T + "&field4=" + P + "&field4=" + voltage +
                   " HTTP/1.1\r\n" +
                   "Host: " + server + "\r\n" + 
                   "Connection: close\r\n\r\n");
