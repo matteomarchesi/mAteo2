@@ -115,6 +115,7 @@ uint32_t actualTime = 0;
 unsigned long prevActualTime = 0;
 
 bool alreadydone = false;
+int lastUpld;
 
 // DHT
 #include <DHT.h>
@@ -207,10 +208,11 @@ void loop() {
     } 
   #endif
   int ora = getMinutes(actualTime);
-  if ((ora==0) || (ora==0) || (ora==30) || (ora==45)){
+  if ((ora==0) || (ora==15) || (ora==30) || (ora==45)){
     if (!alreadydone) {
       readSensors();
       send2server();
+      lastUpld = ora;
       alreadydone = true;     
     }
   } else if (alreadydone) alreadydone = false;
@@ -361,7 +363,7 @@ void send2server(){
 void handleRoot() {
   IPAddress ipAddr = WiFi.localIP();
   
-  serverino.send(200, "text/html", "<p>" + WiFi.SSID() + "</p><p>" + ipAddr[0] + "." + ipAddr[1] + "." + ipAddr[2] + "." + ipAddr[3] +  "<p>temp: " + String(t) + "</p><p>humi:" + String(h) + "</p><p>Temp: " + String(T) + "</p><p>Pres: " + String(P) + "</p><p>Volt: " + String(voltage) + "</p><p>UTC: " + getHours(actualTime) + ":" + getMinutes(actualTime) + ":" + getSeconds(actualTime) + "</p>");
+  serverino.send(200, "text/html", "<p>" + WiFi.SSID() + "</p><p>" + ipAddr[0] + "." + ipAddr[1] + "." + ipAddr[2] + "." + ipAddr[3] +  "<p>temp: " + String(t) + "</p><p>humi:" + String(h) + "</p><p>Temp: " + String(T) + "</p><p>Pres: " + String(P) + "</p><p>Volt: " + String(voltage) + "</p><p>last " + lastUpld + "</p><p>UTC: " + getHours(actualTime) + ":" + getMinutes(actualTime) + ":" + getSeconds(actualTime) + "</p>");
 }
 
 void handleNotFound(){
