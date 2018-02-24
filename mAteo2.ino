@@ -62,6 +62,8 @@
  *
  */
 
+//#define DEBUG
+
 unsigned long previousMillis = 0;        
 const long interval = 15 * 60 * 1000;
 
@@ -104,7 +106,7 @@ const char* resource  = "/update?api_key=";
 const char* server    = "api.thingspeak.com";
 
 
-unsigned long intervalNTP = 60000; // Request NTP time every minute
+unsigned long intervalNTP = 5 * 60000; // Request NTP time every 5 minutes
 unsigned long prevNTP = 0;
 unsigned long lastNTPResponse = millis();
 uint32_t timeUNIX = 0;
@@ -112,6 +114,7 @@ uint32_t actualTime = 0;
 
 unsigned long prevActualTime = 0;
 
+bool alreadydone = false;
 
 // DHT
 #include <DHT.h>
@@ -167,6 +170,7 @@ void setup() {
   pressure.begin();
 
   readSensors();
+  send2server();
 }
  
 void loop() {
@@ -175,33 +179,47 @@ void loop() {
 
    if (currentMillis - prevNTP > intervalNTP) { // If a minute has passed since last NTP request
      prevNTP = currentMillis;
-     Serial.println("\r\nSending NTP request ...");
+     #ifdef DEBUG
+       Serial.println("\r\nSending NTP request ...");
+     #endif
      sendNTPpacket(timeServerIP);               // Send an NTP request
    }
 
   uint32_t time = getTime();                   // Check if an NTP response has arrived and get the (UNIX) time
   if (time) {                                  // If a new timestamp has been received
     timeUNIX = time;
-    Serial.print("NTP response:\t");
-    Serial.println(timeUNIX);
+    #ifdef DEBUG
+      Serial.print("NTP response:\t");
+      Serial.println(timeUNIX);
+    #endif
     lastNTPResponse = currentMillis;
-  } else if ((currentMillis - lastNTPResponse) > 3600000) {
-    Serial.println("More than 1 hour since last NTP response. Rebooting.");
-    Serial.flush();
-    ESP.reset();
-  } 
+  }// else if ((currentMillis - lastNTPResponse) > 3600000) {
+//    Serial.println("More than 1 hour since last NTP response. Rebooting.");
+//    Serial.flush();
+//    ESP.reset();
+//  } 
 
   actualTime = timeUNIX + (currentMillis - lastNTPResponse)/1000;
-  if (actualTime != prevActualTime && timeUNIX != 0) { // If a second has passed since last print
-    prevActualTime = actualTime;
-    Serial.printf("\rUTC time:\t%d:%d:%d   ", getHours(actualTime), getMinutes(actualTime), getSeconds(actualTime));
-  } 
-   
-   if (currentMillis - previousMillis >= interval) {
+  #ifdef DEBUG
+    if (actualTime != prevActualTime && timeUNIX != 0) { // If a second has passed since last print
+      prevActualTime = actualTime;
+      Serial.printf("\rUTC time:\t%d:%d:%d   ", getHours(actualTime), getMinutes(actualTime), getSeconds(actualTime));
+    } 
+  #endif
+  int ora = getMinutes(actualTime);
+  if ((ora==0) || (ora==0) || (ora==30) || (ora==45)){
+    if (!alreadydone) {
+      readSensors();
+      send2server();
+      alreadydone = true;     
+    }
+  } else if (alreadydone) alreadydone = false;
+  
+/*   if (currentMillis - previousMillis >= interval) {
     previousMillis = currentMillis;
     readSensors();
     send2server();
-   }
+   }*/
    serverino.handleClient(); 
 }
 
@@ -274,10 +292,14 @@ void readSensors(){
       delay(status);
       status = pressure.getPressure(P,T);
     }
-	
-	voltage = ESP.getVcc();
-	voltage = voltage/1024;
-	
+
+  voltage = 0;
+  for (int i=0; i<10; i++){
+  	voltage = voltage + ESP.getVcc();
+  }
+	voltage = voltage/10240;
+
+  #ifdef DEBUG
     Serial.print("temp \t");
     Serial.println(t);
     Serial.print("humi \t");
@@ -290,7 +312,7 @@ void readSensors(){
     Serial.println(voltage);
 	
     Serial.println();
-    
+  #endif    
 }
 
 
@@ -300,15 +322,20 @@ void send2server(){
   int retries = 25;
   
   while(!!!client.connect(server, 80) && (retries-- > 0)) {
-    Serial.print(".");
+    delay(100);
+    #ifdef DEBUG
+      Serial.print(".");
+    #endif
   }
-  Serial.println();
-  if(!!!client.connected()) {
-     Serial.println("Failed to connect, going back to sleep");
-  }
+  #ifdef DEBUG
+    Serial.println();
+    if(!!!client.connected()) {
+       Serial.println("Failed to connect, going back to sleep");
+    }
   
   Serial.print("Request resource: "); 
   Serial.println(resource);
+  #endif
   client.print(String("GET ") + resource + apiKey + "&field1=" + t + "&field2=" + h + "&field3=" + T + "&field4=" + P + "&field5=" + voltage +
                   " HTTP/1.1\r\n" +
                   "Host: " + server + "\r\n" + 
@@ -319,9 +346,9 @@ void send2server(){
   while(!!!client.available() && (timeout-- > 0)){
     delay(100);
   }
-  if(!!!client.available()) {
-     Serial.println("No response, going back to sleep");
-  }
+//  if(!!!client.available()) {
+//     Serial.println("No response, going back to sleep");
+//  }
   while(client.available()){
     Serial.write(client.read());
   }
