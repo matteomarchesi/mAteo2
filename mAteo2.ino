@@ -139,11 +139,10 @@ ADC_MODE(ADC_VCC);
 
 
 void setup() {
-  delay(1000);
   // start Serial as TX only (GPIO1) to use the RX pin (GPIO3)
   Serial.begin(115200,SERIAL_8N1,SERIAL_TX_ONLY);
   pinMode(3,INPUT_PULLUP);
-  delay(10);
+  delay(100);
 
   connect2wifimulti();
 
@@ -161,21 +160,23 @@ void setup() {
   sendNTPpacket(timeServerIP);
 
   
-  startOTA();
+//  startOTA();
+
+  dht.begin();
   
 // sda/scl to 0/2
   Wire.begin(0,2);
-  delay(500);
+  delay(2000);
 
   // BPM setup
   pressure.begin();
 
   readSensors();
-  send2server();
+//  send2server();
 }
  
 void loop() {
-   ArduinoOTA.handle();
+//   ArduinoOTA.handle();
    unsigned long currentMillis = millis();
 
    if (currentMillis - prevNTP > intervalNTP) { // If a minute has passed since last NTP request
@@ -276,8 +277,16 @@ void connect2wifi(){
 
 
 void readSensors(){
-    h = dht.readHumidity();
-    t = dht.readTemperature();
+
+    int x = 0;
+    while(x < 10){
+      delay(1000);
+      h = dht.readHumidity();
+      t = dht.readTemperature();
+      if (!isnan(h) || !isnan(t)) x=10;
+      x++;
+    }
+    
     
     status = pressure.startTemperature();
     if (status != 0)
@@ -296,10 +305,10 @@ void readSensors(){
     }
 
   voltage = 0;
-  for (int i=0; i<10; i++){
+  for (int i=0; i<30; i++){
   	voltage = voltage + ESP.getVcc();
   }
-	voltage = voltage/10240;
+	voltage = voltage/1024/30;
 
   #ifdef DEBUG
     Serial.print("temp \t");
@@ -357,6 +366,8 @@ void send2server(){
   
   Serial.println("\nclosing connection");
   client.stop();
+  ESP.deepSleep(13*60*1000000);
+  delay(2000);
 
 }
 
