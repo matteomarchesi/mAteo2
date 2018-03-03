@@ -84,6 +84,7 @@ const char* apiKey    = "A1QSQK269EGGKM8D";
 const char* resource  = "/update?api_key=";
 const char* server    = "api.thingspeak.com";
 
+const uint32_t sleep4 = 20*60*1000000;
 
 ESP8266WiFiMulti wifiMulti;  
 void connect2wifimulti();
@@ -127,9 +128,15 @@ void setup() {
   // BPM setup
   pressure.begin();
 
-  readSensors();
+//  readSensors();
+  readVCC();
+  readBMP();
+  readDHT();
+
   send2server();
   
+  ESP.deepSleep(sleep4); 
+  delay(500);
 }
 
 void loop() {
@@ -156,6 +163,53 @@ void connect2wifimulti(){
 
 }
 
+void readDHT(){
+    int x = 0;
+    while(x < 10){
+      delay(1000);
+      h = dht.readHumidity();
+      t = dht.readTemperature();
+      if (!isnan(h) || !isnan(t)) x=10;
+      x++;
+    }
+}
+
+
+void readBMP(){
+    status = pressure.startTemperature();
+    if (status != 0)
+    {
+      // Wait for the measurement to complete:
+      delay(status);
+      status = pressure.getTemperature(T);
+    }
+  
+    status = pressure.startPressure(3);
+    if (status != 0)
+    {
+      // Wait for the measurement to complete:
+      delay(status);
+      status = pressure.getPressure(P,T);
+    }
+}
+
+void readVCC(){
+  int n = 5;
+  double tmp = 0;
+  int x = 0;
+
+  voltage = 0;
+
+  for (int i=0; i<10; i++){
+    tmp = ESP.getVcc();
+    tmp = tmp / 1024;
+    if (tmp>1) x++;
+    voltage = voltage + tmp;
+    delay(100);
+  }
+  voltage = voltage/x;
+  
+}
 
 void readSensors(){
 
@@ -246,8 +300,7 @@ void send2server(){
   
   Serial.println("\nclosing connection");
   client.stop();
-  ESP.deepSleep(29*30*1000000); //sleep for 14min and 30sec
-  delay(2000);
+
 
 }
 
