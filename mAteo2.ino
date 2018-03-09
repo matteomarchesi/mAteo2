@@ -128,10 +128,10 @@ void setup() {
   // BPM setup
   pressure.begin();
 
-//  readSensors();
-  readVCC();
-  readBMP();
-  readDHT();
+  readSensors();
+//  readVCC();
+//  readBMP();
+//  readDHT();
 
   send2server();
   
@@ -172,6 +172,7 @@ void readDHT(){
       if (!isnan(h) || !isnan(t)) x=10;
       x++;
     }
+    if (!isnan(h) || !isnan(t)) ESP.reset();
 }
 
 
@@ -208,6 +209,7 @@ void readVCC(){
     delay(100);
   }
   voltage = voltage/x;
+  if (x==0) ESP.reset();
   
 }
 
@@ -239,13 +241,17 @@ void readSensors(){
       status = pressure.getPressure(P,T);
     }
 
-  voltage = 0;
+  voltage = ESP.getVcc();
+  voltage = voltage/1024.0;
+
+
+/*
   for (int i=0; i<10; i++){
   	voltage = voltage + ESP.getVcc();
     delay(100);
   }
 	voltage = voltage/1024/10;
-
+*/
   #ifdef DEBUG
     Serial.print("temp \t");
     Serial.println(t);
@@ -300,7 +306,6 @@ void send2server(){
   
   Serial.println("\nclosing connection");
   client.stop();
-
 
 }
 
